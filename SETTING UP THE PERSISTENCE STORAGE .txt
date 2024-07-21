@@ -1,0 +1,27 @@
+SETTING UP THE PERSISTENCE STORAGE SYSTEM USING S3 BUCKET
+
+1. Navigate to aws and s3 service and create an empty s3 bucket let's call it 'spinnaker-test' and note the region where you have created the s3 bucket.
+
+2. set the block-all public access to enable all public access. NOTE: on your production, this is not advisable so follow your expected security guidelines
+
+3. Acknowledge and then create the bucket.
+
+4. login to the spinnaker server and clone this repo, there is a folder called artifact, we are going to push its content to the s3 bucket because we will use the content later in the process to deploy an application that will just print 'hello world'
+
+5.  Now, to communicate from spinnaker to aws, we need to install a tool called 'aws cli' so we run the command 'sudo apt-get install aws cli' and this will install aws cli and with this, we can now manage our aws settings including the s3 buckets 
+
+6.Now, to configure the aws credentials to aws, we run 'aws config' and this will ask for the access key and secrete key which we have created early, so we just supply them along with the region where we created our s3 bucket and proceed.
+
+7. After which, we can verify if the configuration is correct by running 'aws s3 ls' and this will list all the s3 bucket you have in that region where you will find the one you just created.
+
+8. Now, to upload the content in the artifact folder to the s3 bucket (spinnaker-test), we navigate to the folder artifact and then run 'aws s3 . s3://spinnaker-test/' and then hit enter and this will push all the content in that folder to the s3 bucket. You can verify if the content are actually there by going to aws then the s3 bucket to check it content and you will see them there.
+
+9. Now, to configure s3 bucket as the persistence storage for spinnaker, we run 'hal config storage s3 edit --access-key-id $YOUR_SECRET_KEY_ID --secret-access-key'. pass in the access key and run the command and it will ask for the secrete key then also pass the secret key.
+
+9. Then also run 'hal config storage edit --type s3' to set the storage type to s3.
+
+10. After this is done, you can verify the configuration from the spinnaker home directory (/home/spinnaker/.hal/config) and look for s3 to see the configuration.
+
+11. After doing the above, to make the changes reflect on spinnaker, we run 'sudo hal deploy apply' and this will refresh all settings and add the new s3 configuration so it can reflect on Spinnaker.
+
+

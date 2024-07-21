@@ -1,0 +1,83 @@
+INTEGRATING SPINNAKER WITH AWS
+
+To integrate AWS with Spinnaker we need to create a MANAGING ACCOUNT, a MANAGED ACCOUNT, and IAM ROLE.
+
+MANAGING ACCOUNT:
+	This is the account used by Spinnaker to authenticate into AWS.
+
+MANAGED ACCOUNT:
+	This is the account used by Spinnaker to modify the resources within the AWS.
+
+So we can have any number of managed accounts but we can only have one managing account.
+
+IAM ROLE:
+	The IAM ROLE handles authentication from managing account to managed account and not with Spinnaker.
+
+CREATING THE IAM ROLE:
+1. log on to your AWS account and note your account ID
+2. navigate to IAM and then CREATE Role, then select AWS service and call this role 'BaseIAMRole'
+	NOTE: Don't add any roles or permission, Just create a BLANK One
+
+CREATING THE MANAGING ACCOUNT:
+	First, we need to create a policy
+1. Navigate to policies and create a new policy and then click on the JSON and then replace the JSON with the one provided below
+
+{
+    "Version": "2012-10-17",
+    "Statement": [{
+        "Action": "sts:AssumeRole",
+        "Resource": [
+            "arn:aws:iam::${MANAGING_ACCOUNT_ID}:role/spinnakerManaged",
+            "arn:aws:iam::${MANAGED_ACCOUNT_ID}:role/spinnakerManaged"
+        ],
+        "Effect": "Allow"
+    }]
+}
+
+Replace MANAGING_ACCOUNT_ID with your AWS ACCOUNT_ID, the one you noted earlier, and then click next and name this policy "SpinnakerAssumeRolePolicy" and create this policy
+This is the account we will use to authenticate with Spinnaker.
+
+2. create the user by clicking on users and creating one, call this user SPINNAKER, make the user a programmatic type and attach some policies such as "POWERUSER PRIVILEGE" and the policy we just created above "SpinnakerAssumeRolePolicy" and you know this our created poly is already having the account_id. Then go ahead and create this user, note the login details, create the access_id key, and secrete_id key, and note the ARN of this user because we will be needing it in future policy creation, note them securely because this is what we are using to control the AWS resources 
+
+CREATING THE MANAGED ACCOUNT/MANAGED ROLE:
+	Again, we first create a policy.
+1. create a policy by clicking on policy creation and then open the JSON and replacing it with the one I provided below 
+
+{
+    "Version": "2012-10-17",
+    "Statement": [{
+        "Effect": "Allow",
+        "Action": [ "ec2:*" ],
+        "Resource": "*"
+    },
+    {
+        "Effect": "Allow",
+        "Action": "iam:PassRole",
+        "Resource": "arn:aws:iam::${MANAGING_ACCOUNT_ID}:role/BaseIAMRole"
+    }]
+}
+
+Replace MANAGING_ACCOUNT_ID with your account_id next and then name this policy 'SpinnakerPassRole' and create this policy
+
+2. Then create the ROLE call this role SpinnakerManaged, give the power privilege to this role and SpinnakerPassRole policy, and then create this role.
+3. Then click on this same role and open trust relationships  
+
+{
+    "Version": "2012-10-17",
+    "Statement": [{
+        "Sid": "1",
+        "Effect": "Allow",
+        "Principal": {
+            "AWS": "${AUTH_ARN}"
+        },
+    "Action": "sts:AssumeRole"
+    }]
+}
+
+4. Replace the JSON there with the one am providing below and then replace the AUTH_ARN with the one you noted earlier and then click update trust policy.
+
+WITH THIS, WE HAVE SUCCESSFULLY CREATED AN IAM ROLE, ONE MANAGING ACCOUNT AND ONE MANAGED ACCOUNT/ROLE SO WITH THESE CREDENTIALS, WE CAN AUTHENTICATE SPINNAKER WITH AWS USING HALYARD
+
+NEXT: We'll install Spinnaker and integrate it with AWS using the credentials mentioned above.
+
+Rubben........

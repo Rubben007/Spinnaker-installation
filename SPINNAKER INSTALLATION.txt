@@ -1,0 +1,39 @@
+SPINNAKER INSTALLATION
+
+You could install Spinnaker on Docker or Kubernetes but am going to be installing it on an Ubuntu EC2 instance in AWS.
+ 
+EC2/HALYARD SET:
+
+1. first spin up the instance and ensure you install Java on it as Spinnaker is a java based application
+
+2. since am using HALYARD to install spinnaker I will first have to install the hal directory by running this command "curl -O https://raw.githubusercontent.com/spinnaker/halyard/master/install/debian/InstallHalyard.sh"
+
+3. then run this command "sudo bash InstallHalyard.sh" to install Halyard.sh
+	Check whether Halyard was installed properly:
+	"hal -v"
+
+        If this command fails, make sure hal is in your $PATH, and check the logs under /var/log/spinnaker/halyard/halyard.log.
+
+4. Run ". ~/.bashrc" to enable command completion.
+
+5. Run "hal config version edit --version 1.34.1" to configure the version of spinnaker
+	You can change the version according to the version you want to work with
+
+TO CONFIGURE AWS:
+
+1. hal config provider aws edit --access-key-id $YOUR_SECRET_KEY_ID --secret-access-key
+
+2. hal config provider aws account add $AWS_ACCOUNT_NAME --account-id ${ACCOUNT_ID} --assume-role role/spinnakerManaged
+
+3. hal config provider aws account edit $AWS_ACCOUNT_NAME --regions us-east-1
+
+4. hal config provider aws enable
+
+SINCE WE HAVE NOTED ALL THE CREDENTIALS NEEDED ABOVE, WE WILL THEN SUPPLY THEM ACCORDINGLY 
+
+FOR AWS_ACCOUNT_NAME: provide any name of your choice to the account because this is the managed account to Spinnaker.
+
+5. after the above configuration, the configuration is stored in your /home/spinnaker/.hal/config depending on your current working directory so you can cat that directory and verify
+
+WITH THIS, WE HAVE SUCCESSFULLY CONFIGURED AWS WITH SPINNAKER. NEXT, WE WILL SET UP THE PERSISTENCE STORAGE SYSTEM USING S3 BUCKET
+Rubben.....

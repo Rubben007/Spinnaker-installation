@@ -1,0 +1,33 @@
+HOW TO INTEGRATE SPINNAKER WITH JENKINS (A CI TOOL)
+
+1. Deploy a Jenkins instance if you don't have one already running. in this tutorial, I will be using the one I deployed on an AWS instance or you can use Docker to deploy one and expose the port so you can reach it from the outside, or on this repo, I have provided a script called 'JENKINS INSTALLER' which if you run it on an ubuntu ami it should install Jenkins, docker and gnupg which we will be needing later on in this tutorial for deployment of docker images and signing with the repo packages so we will be needing these dependencies. 
+
+2. So you can spin up the Jenkins instance and set it up using the script I provide and it will also install docker and gnupg on that same machine.
+
+3. After all that let's now integrate the spinnaker with Jenkins by running the following commands
+   hal config ci jenkins enable
+   hal config ci jenkins master add Jenkins-Master --address http://{IPAddress}:8080 --username $USERNAME --password
+   hal config ci jenkins master edit Jenkins-Master --csrf true
+
+4. Supply the public ip address, the user_name, of your Jenkins into the second command and run the query, it will ask for the password, then supply the password and hit enter
+
+5. To enable CSRf (security standard in spinnaker) just run the third command. (NOTE THIS APPLICABLE WHEN U ARE USING A LOWER VERSION OF JENKINS)
+
+6. To view the config, simply go to the home directory (/home/spinnaker/.hal/config) and search for Jenkins'
+   NOTE: The service that takes care of Spinnaker integration with CI tool is the Igor service.
+
+7. Next is to configure Jenkins and Spinnaker for CSRF protection. So we have configure csrf on the spinnaker config file but we still need to enable it on the Jenkins side.
+
+8. So we go to Jenkins and install a plugin called 'strict crumb' and enable it and with this, spinnaker will be able to trigger a job from Spinnaker to Jenkins.
+
+9. After the Installation, go to 'configure global security under security in Jenkins' and search for csrf
+
+10. The crumb issuer will be on default, but since you have installed 'strict crumb' you can now set it to strict crumb issuer,
+
+11. Then go to advance and by default, 'check the default id' will be enabled, disable it and enable 'prevent breach attack' and save. So this is the prerequisite in Jenkins integration with Spinnaker.
+
+12. Once all these is done, we can then create a test job in Jenkins and run this job.
+
+13. Next I will show you how to trigger this Job from Spinnaker. 
+
+HOPE THIS HAS BEEN HELPFUL SO FAR?..... 
